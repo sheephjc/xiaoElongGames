@@ -14,12 +14,12 @@ const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE);
-  await page.waitForSelector('.setup-panel');
-  await page.click('button.primary-btn.big');
-  await page.waitForSelector('.hall-page');
+  await page.waitForSelector('.home[data-panel="main"]');
+  await page.click('[data-home-entry="hall"]');
+  await page.waitForSelector('.home[data-panel="hall"]');
   await page.waitForTimeout(400);
 
-  const cards = await page.locator('.hall-card').allTextContents();
+  const cards = await page.locator('.home-game').allTextContents();
   const hasBattlefield = cards.some((t) => t.includes('鳄龙战场'));
   const hasTrouble = cards.some((t) => t.includes('出包魔法师'));
   await page.screenshot({ path: `${OUT}2026-08-15-archived-hall.png` });

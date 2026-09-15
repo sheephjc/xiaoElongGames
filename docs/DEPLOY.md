@@ -1,7 +1,9 @@
 # 服务端部署指南（腾讯云）
 
+当前实际运行的 Linux / 1Panel 部署配置、访问地址和验证记录见 [DEPLOY-1PANEL.md](DEPLOY-1PANEL.md)。
+
 《小鳄龙之家》游戏大厅是**单进程服务**：完整大厅（《出包魔法师》桌游 +
-《鳄龙咆哮》3D FPS）+ Socket.IO 对战 + 同端口托管前端静态产物，
+《鳄龙咆哮》3D FPS +《暗棋》双人对弈 +《漳州麻将》）+ Socket.IO 对战 + 同端口托管前端静态产物，
 一个端口即可上线。客户端无需单独部署（浏览器访问即客户端）；
 另有「双击即玩」的本地客户端包，见 README「本地单机入口」。
 
@@ -13,12 +15,22 @@
 | 项 | 要求 |
 |----|------|
 | 操作系统 | 任意主流 Linux（Ubuntu 20.04+/Debian 11+/CentOS Stream 8+）；macOS 亦可（开发/自用） |
-| Node.js | ≥ 20（推荐 22 LTS） |
-| pnpm | ≥ 9（corepack 自动启用仓库锁定的 11.7.0） |
+| Node.js | ≥ 22.13（Docker 镜像使用 Node 22 / Alpine 3.22） |
+| pnpm | 11.7.0（corepack 自动启用仓库锁定版本） |
 | 内存 | 512MB 以上（对局无持久化，内存占用很低；Docker 构建期建议 ≥ 1GB 或配 swap） |
 | 网络 | 放行一个 TCP 端口（默认 8080/8787，按你的配置） |
 
 ## 2. 部署方式总览
+
+Docker 构建的依赖、前端构建和运行阶段均包含完整游戏工作区，避免 `workspace:*` 包缺失。
+运行时仍由单个 Node 进程同源托管前端与 Socket.IO，不需要部署第二个客户端服务。
+暗棋挂载在同一个 Socket.IO 服务的 `/anqi` 命名空间，不需要额外的 3001 端口。
+其健康检查是 `/api/anqi/health`，开发时由 Vite 代理到同一个平台服务。
+漳州麻将使用 `/zhangzhou-mahjong` 命名空间与 `/api/mahjong/health` 健康检查。
+原版网页素材由前端构建自动复制到 `dist/mahjong/`，服务器规则位于游戏工作区；
+无需 Firebase 配置、认证 SDK 或数据库。房间与重连凭据保存在服务器内存中，重启后重新建房。
+从 Windows 检出到 Linux 时，仓库 `.gitattributes` 保证 Shell 脚本使用 LF；
+部署脚本也可使用 `bash scripts/deploy.sh` 执行，不依赖 Windows 下的执行权限。
 
 | 方式 | 适合 | 说明 |
 |------|------|------|

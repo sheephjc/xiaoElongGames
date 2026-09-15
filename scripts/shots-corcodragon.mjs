@@ -18,18 +18,18 @@ try {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   await page.goto(BASE);
-  await page.waitForSelector('.setup-panel');
+  await page.waitForSelector('.home[data-panel="main"]');
   await sleep(300);
 
   // 大厅：确认鳄龙战场卡片出现
-  await page.click('button.primary-btn.big');
-  await page.waitForSelector('.hall-page');
+  await page.click('[data-home-entry="hall"]');
+  await page.waitForSelector('.home[data-panel="hall"]');
   await sleep(400);
   await shot(page, '2026-08-15-hall');
   console.log('✅ hall');
 
   // 详情页
-  const card = page.locator('.hall-card').filter({ hasText: '鳄龙战场' });
+  const card = page.locator('.home-game').filter({ hasText: '鳄龙战场' });
   await card.click();
   await page.waitForSelector('.cdf-detail-panel');
   await sleep(400);

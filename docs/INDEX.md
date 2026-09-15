@@ -17,6 +17,8 @@
 └─ games/<game-id>/ 游戏子项目（只被平台依赖，禁止反向依赖 apps）
    ├─ trouble-magician    第一款游戏（回合制桌游）
    ├─ corcodragon-fight   鳄龙咆哮（3D 实时 FPS）
+   ├─ anqi               暗棋（双人本地同屏 / 同源联机）
+   ├─ zhangzhou-mahjong   漳州麻将（单机 / 1–4 人服务器联机）
    └─ corcodragon-fire    已归档的鳄龙战场（available=false，保留代码）
 ```
 
@@ -31,6 +33,7 @@
 | 整体架构、数据流、目录、接入 checklist | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | 从零装环境、跑测试、构建、打包 | [DEVELOPMENT.md](DEVELOPMENT.md) |
 | 服务端/客户端部署、环境变量、运维 | [DEPLOY.md](DEPLOY.md) |
+| 首页场景、面板交互、UI 回归与 Linux 验证 | [UI.md](UI.md) |
 | 出包魔法师完整规则 | [出包魔法师桌游基本规则.md](出包魔法师桌游基本规则.md) |
 | 实时 FPS 通道设计（tick/快照/回执/断线） | [REALTIME.md](REALTIME.md) |
 | 战斗判定与弹道算法 | [COMBAT.md](COMBAT.md) |

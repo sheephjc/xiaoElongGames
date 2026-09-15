@@ -6,10 +6,16 @@ import { troubleMagicianModule } from '@tm/game-trouble-magician';
 import { corcodragonFireModule } from '@tm/game-corcodragon-fire';
 import { corcodragonFightModule } from '@tm/game-corcodragon-fight';
 import type { GameModule } from '../../../games/types';
+import { anqiModule } from '@tm/game-anqi';
+import { zhangzhouMahjongModule } from '@tm/game-zhangzhou-mahjong';
 
-export const GAMES: GameModule[] = [
-  troubleMagicianModule,
-  corcodragonFightModule,
+export type HallGame = GameModule & { cover?: string; tag?: string };
+
+export const GAMES: HallGame[] = [
+  { ...troubleMagicianModule, cover: 'cover-magician.webp', tag: '魔法 · 推理' },
+  { ...corcodragonFightModule, cover: 'cover-fight.webp', tag: '英雄 · 射击' },
+  { ...anqiModule, cover: 'cover-anqi.png', tag: '揭棋 · 对弈' },
+  { ...zhangzhouMahjongModule, cover: 'cover-zhangzhou-mahjong.png', tag: '开金 · 游金' },
   corcodragonFireModule,
 ];
 

@@ -72,12 +72,12 @@ const include = [
   ['apps/web/package.json', 'apps/web/package.json'],
   ['apps/web/tsconfig.json', 'apps/web/tsconfig.json'],
   ['apps/web/dist', 'apps/web/dist', { excludeAssets: false }],
-  ['games/types.ts', 'games/types.ts'],
-  ['games/trouble-magician', 'games/trouble-magician'],
-  ['games/corcodragon-fire', 'games/corcodragon-fire'],
-  ['games/corcodragon-fight', 'games/corcodragon-fight'],
+  ['games', 'games'],
   ['README.md', 'README.md'],
   ['docs', 'docs'],
+  ['deploy/1panel/compose.yaml', 'compose.yaml'],
+  ['deploy/1panel/install-deps.sh', 'install-deps.sh'],
+  ['scripts/check-deployment.mjs', 'scripts/check-deployment.mjs'],
 ];
 
 for (const [from, to, opts] of include) copyItem(from, to, opts);

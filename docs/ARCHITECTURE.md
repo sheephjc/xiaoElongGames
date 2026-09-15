@@ -105,7 +105,7 @@ apps/server  Socket.IO
 
 ## 新游戏接入指南（平台/游戏两层分离）
 
-> 目的：往大厅加新游戏时，**只新建一个 games/<id>/ 目录**，不动大厅/房间/连接代码。
+> 目的：每款游戏的源码集中在 `games/<id>/`，平台登记入口并绑定其 UI 与联机服务。
 > 给 AI 的上下文 = 本文档 + `games/types.ts`（GameModule 契约）+ 一个参考游戏目录（trouble-magician）。
 
 ### 目录约定
@@ -113,7 +113,6 @@ apps/server  Socket.IO
 ```
 games/
 ├─ types.ts            GameModule 契约（平台与游戏的唯一接口）
-├─ registry.ts         游戏注册表（新游戏在此登记）
 └─ <game-id>/          每个游戏一个目录
    ├─ engine.ts        规则引擎：状态 + apply(playerId, action) + getView(playerId) 投影
    ├─ ai.ts            AI 决策（只用 getView 视角信息）
@@ -125,15 +124,14 @@ games/
 ### 接入步骤（checklist）
 
 1. 在 `games/<id>/` 实现引擎与 AI；引擎必须：随机数可注入（可测）、动作入参白名单校验、`getView` 隐藏玩家不可见信息。
-2. 写 `index.ts` 导出 `GameModule`（id/name/emoji/mode/人数/描述/createEngine/createAI/GameUI）。
-3. 在 `games/registry.ts` 的 `GAMES` 数组登记 → 大厅自动出现该游戏卡片。
-4. **服务端通用化（第二个游戏接入时做一次）**：把 `apps/server` 里出包专属的动作事件
-   （`declareSpell`/`endTurn`/`nextRound`）替换为通用 `gameAction { gameId, action }`，
-   Room 按 `gameId` 从注册表 `createEngine` 并调用 `engine.apply()`；协议加 `gameId` 字段。
-   平台能力（建房/密码/托管/重连/关房）保持不变。
-5. UI：`GameDetailScreen`/`LobbyScreen`/`GameTable` 按 `gameId` 路由（当前仅一个游戏为硬编码，
-   第二个游戏接入时抽象为按注册表分发）。
-6. 验收：引擎单测 + `pnpm test/typecheck/build` + 冒烟 + 双窗口回归 + 布局 QA。
+2. 写 `index.ts` 导出 `GameModule`（id/name/emoji/mode/人数/描述与适用的引擎／AI 工厂）。
+3. 在 `apps/web/src/games.tsx` 的 `GAMES` 数组登记，可填写 cover/tag；大厅按注册表生成可滚动游戏卡片。
+4. 在 `App.tsx` 按 gameId 绑定按需加载的 UI。UI 保持独立样式，退出回调返回游戏选择面板。
+5. 服务端接入适用的房间处理逻辑。现有 Room 与 RealtimeRoom 保留原协议；已有独立协议的游戏可采用
+   暗棋的方式，在同一个 Socket.IO 实例挂载独立命名空间，继续共用网站端口与域名。
+6. 将工作区依赖加入 apps 对应的 package.json 和锁文件；Docker 依赖阶段补齐新工作区清单。
+   发布脚本已收集整个 games 目录，前端素材随 web dist 分发。
+7. 验收：引擎单测 + `pnpm test/typecheck/build` + 冒烟 + 双窗口回归 + 布局 QA。
 
 ### 三种模式的平台差异（含 FPS/动作类适配方案）
 

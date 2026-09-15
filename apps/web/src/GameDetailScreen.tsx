@@ -24,23 +24,46 @@ export default function GameDetailScreen({
   onBack: () => void;
 }) {
   return (
-    <div className="page detail-page">
+    <div className="page detail-page game-foyer game-foyer--magician">
       <div className="panel detail-panel">
-        <div className="detail-head">
-          <span className="detail-emoji">🧙</span>
-          <div className="detail-title">
-            <h1>出包魔法师</h1>
-            <span className="detail-meta">回合制 · 实时房间｜2-5 人｜8 种魔法 · 36 张牌</span>
+        <button className="ghost-btn foyer-back" onClick={onBack}>
+          ← 返回游戏大厅
+        </button>
+        <div className="foyer-hero">
+          <div className="foyer-intro">
+            <div className="detail-head">
+              <div className="detail-title">
+                <h1>出包魔法师</h1>
+                <span className="detail-meta">2–5 人 · 欢乐推理 · 轻策略桌游</span>
+              </div>
+            </div>
+            <p className="detail-desc">
+              见习魔法师聚在一起乱放魔法：你的手牌背对自己，看不到自己会什么，只能靠观察别人来猜。
+              喊对 → 魔法生效；喊错 → 出包扣血！先到 8 分且分数最高者获胜。
+            </p>
+            <div className="foyer-facts">
+              <span>
+                <b>8</b> 种魔法
+              </span>
+              <span>
+                <b>36</b> 张牌
+              </span>
+              <span>
+                <b>8</b> 分决胜
+              </span>
+            </div>
+          </div>
+          <div className="foyer-art">
+            <img
+              src={`${import.meta.env.BASE_URL}hall/cover-magician.webp`}
+              alt="魔法师围坐桌边施法"
+            />
           </div>
         </div>
-        <p className="detail-desc">
-          见习魔法师聚在一起乱放魔法：你的手牌背对自己，看不到自己会什么，只能靠观察别人来猜。
-          喊对 → 魔法生效；喊错 → 出包扣血！先到 8 分且分数最高者获胜。
-        </p>
 
         <div className="detail-modes">
-          <section className="detail-mode">
-            <h2>🎮 单人 vs AI</h2>
+          <section className="detail-mode foyer-local">
+            <h2>单人练习</h2>
             <div className="field">
               <span>玩家总数（其余为 AI）</span>
               <div className="count-picker">
@@ -77,8 +100,8 @@ export default function GameDetailScreen({
             </button>
           </section>
 
-          <section className="detail-mode">
-            <h2>🌐 联机对战</h2>
+          <section className="detail-mode foyer-online">
+            <h2>好友同桌</h2>
             <p className="muted">
               创建房间分享房间码，或从房间列表加入；支持 AI 补位、房间密码、断线托管。
             </p>
@@ -87,8 +110,8 @@ export default function GameDetailScreen({
             </button>
           </section>
 
-          <section className="detail-mode">
-            <h2>⚙️ 游戏偏好</h2>
+          <section className="detail-mode foyer-preferences">
+            <h2>游戏偏好</h2>
             <div className="pref-row">
               <button
                 className={`pref-btn ${settings.sound ? 'active' : ''}`}
@@ -124,7 +147,8 @@ export default function GameDetailScreen({
             </li>
             <li>回合结束补牌到 5 张。生命上限 6，每轮开始重置。</li>
             <li>
-              一轮结束：击杀他人 +3（存活者 +1）；放完所有魔法 +3；自杀则其他人 +1。猫头鹰秘密牌存活时每张再 +1。
+              一轮结束：击杀他人 +3（存活者 +1）；放完所有魔法 +3；自杀则其他人
+              +1。猫头鹰秘密牌存活时每张再 +1。
             </li>
             <li>先到 8 分且分数最高者获胜。</li>
           </ul>
@@ -140,10 +164,6 @@ export default function GameDetailScreen({
             ))}
           </div>
         </details>
-
-        <button className="ghost-btn" onClick={onBack}>
-          ← 返回游戏大厅
-        </button>
       </div>
     </div>
   );

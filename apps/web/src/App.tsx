@@ -1,13 +1,10 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useLayoutEffect, useState } from 'react';
 import LocalGameScreen from './LocalGameScreen';
 import OnlineScreen from './OnlineScreen';
-import HallScreen from './HallScreen';
+import HomeScreen, { type HomePanel } from './HomeScreen';
 import GameDetailScreen from './GameDetailScreen';
 import { DEFAULT_SETTINGS, type GameSettings } from './GameSettings';
-import {
-  CorcodragonDetailScreen,
-  CorcodragonLocalScreen,
-} from '@tm/game-corcodragon-fire/GameUI';
+import { CorcodragonDetailScreen, CorcodragonLocalScreen } from '@tm/game-corcodragon-fire/GameUI';
 import type { FightConfig, FightPrefs } from '@tm/game-corcodragon-fight/GameUI';
 
 // 鳄龙咆哮含 Three.js（约 600KB），按需分包加载，避免拖慢大厅首屏
@@ -22,13 +19,11 @@ const CorcodragonFightLocalScreen = lazy(() =>
   })),
 );
 const CorcodragonFightOnlineScreen = lazy(() => import('./CorcodragonFightOnlineScreen'));
+const AnqiScreen = lazy(() => import('@tm/game-anqi/GameUI'));
+const ZhangzhouMahjongScreen = lazy(() => import('./ZhangzhouMahjongScreen'));
 
 const Loading = () => (
-  <div className="page">
-    <div className="panel">
-      <p className="tagline">🐊 正在准备战场……</p>
-    </div>
-  </div>
+  <div className="app-loading" role="status">正在加载游戏……</div>
 );
 
 function loadSettings(): GameSettings {
@@ -64,12 +59,22 @@ function loadFightPrefs(): FightPrefs {
   return { sound: true, fx: true };
 }
 
-type Screen = 'setup' | 'hall' | 'game' | 'local' | 'online';
+type Screen = 'home' | 'game' | 'local' | 'online';
+
+function loadPlayerName(): string {
+  try {
+    return localStorage.getItem('tm-player-name')?.slice(0, 8).trim() || '你';
+  } catch {
+    return '你';
+  }
+}
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('setup');
+  const [screen, setScreen] = useState<Screen>('home');
   const [playerCount, setPlayerCount] = useState(4);
-  const [myName, setMyName] = useState('你');
+  const [myName, setMyName] = useState(loadPlayerName);
+  const [homePanel, setHomePanel] = useState<HomePanel>('main');
+  const [homeLayout, setHomeLayout] = useState<'list' | 'all'>('list');
   const [sessionKey, setSessionKey] = useState(0);
   const [selectedGameId, setSelectedGameId] = useState('trouble-magician');
   const [settings, setSettings] = useState<GameSettings>(loadSettings);
@@ -82,6 +87,14 @@ export default function App() {
     aiLevel: 'normal',
   });
   const [fightPrefs, setFightPrefs] = useState<FightPrefs>(loadFightPrefs);
+
+  useLayoutEffect(() => {
+    document.body.dataset.appTheme =
+      screen === 'local' || screen === 'online'
+        ? selectedGameId === 'trouble-magician' ? 'magician' : 'game'
+        : screen === 'game' && selectedGameId === 'corcodragon-fire' ? 'game' : 'light';
+    return () => { delete document.body.dataset.appTheme; };
+  }, [screen, selectedGameId]);
 
   const updateSettings = (patch: Partial<GameSettings>) => {
     setSettings((s) => {
@@ -107,23 +120,36 @@ export default function App() {
     });
   };
 
-  if (screen === 'hall') {
-    return (
-      <HallScreen
-        onEnter={(gameId) => {
-          setSelectedGameId(gameId);
-          setScreen('game');
-        }}
-        onBack={() => setScreen('setup')}
-      />
-    );
-  }
+  const updateName = (name: string) => {
+    const next = name.slice(0, 8);
+    setMyName(next);
+    try {
+      localStorage.setItem('tm-player-name', next.trim() || '你');
+    } catch {
+      /* storage may be unavailable */
+    }
+  };
+  const returnToHall = () => {
+    setHomePanel('hall');
+    setScreen('home');
+  };
 
   if (screen === 'game') {
+    if (selectedGameId === 'zhangzhou-mahjong') {
+      return <Suspense fallback={<Loading />}><ZhangzhouMahjongScreen nickname={myName} onExit={returnToHall} /></Suspense>;
+    }
+    if (selectedGameId === 'anqi') {
+      return (
+        <Suspense fallback={<Loading />}>
+          <AnqiScreen nickname={myName} onExit={returnToHall} />
+        </Suspense>
+      );
+    }
     if (selectedGameId === 'corcodragon-fight') {
       return (
         <Suspense fallback={<Loading />}>
           <CorcodragonFightDetailScreen
+            coverUrl={`${import.meta.env.BASE_URL}hall/cover-fight.webp`}
             playerCount={playerCount}
             onPlayerCountChange={setPlayerCount}
             prefs={fightPrefs}
@@ -140,7 +166,7 @@ export default function App() {
               setScreen('online');
             }}
             onlineReady={true}
-            onBack={() => setScreen('hall')}
+            onBack={returnToHall}
           />
         </Suspense>
       );
@@ -156,7 +182,7 @@ export default function App() {
             setSessionKey((k) => k + 1);
             setScreen('local');
           }}
-          onBack={() => setScreen('hall')}
+          onBack={returnToHall}
         />
       );
     }
@@ -176,7 +202,7 @@ export default function App() {
           setSessionKey((k) => k + 1);
           setScreen('online');
         }}
-        onBack={() => setScreen('hall')}
+        onBack={returnToHall}
       />
     );
   }
@@ -255,24 +281,24 @@ export default function App() {
     );
   }
 
-  // ---- 首页（昵称 → 游戏大厅） ----
   return (
-    <div className="page setup-page">
-      <div className="panel setup-panel">
-        <h1>
-          🐊 小鳄龙之家 <span className="subtitle">Game Hall · 游戏大厅</span>
-        </h1>
-        <p className="tagline">选择游戏，和朋友一起玩</p>
-
-        <label className="field">
-          <span>你的名字</span>
-          <input value={myName} maxLength={8} onChange={(e) => setMyName(e.target.value)} />
-        </label>
-
-        <button className="primary-btn big" onClick={() => setScreen('hall')}>
-          🎮 进入游戏大厅
-        </button>
-      </div>
-    </div>
+    <HomeScreen
+      panel={homePanel}
+      layout={homeLayout}
+      onLayoutChange={setHomeLayout}
+      onPanelChange={(next) => {
+        setHomePanel(next);
+        setHomeLayout(next === 'members' ? 'all' : 'list');
+      }}
+      onEnterGame={(gameId) => {
+        updateName(myName.trim() || '你');
+        setSelectedGameId(gameId);
+        setScreen('game');
+      }}
+      myName={myName}
+      onNameChange={updateName}
+      settings={settings}
+      onUpdateSettings={updateSettings}
+    />
   );
 }

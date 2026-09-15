@@ -10,11 +10,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tm/game-anqi": "workspace:*",
     "@tm/game-corcodragon-fight": "workspace:*",
     "@tm/rules": "workspace:*",
     "express": "^4.21.2",
     "socket.io": "^4.8.1",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "@tm/game-zhangzhou-mahjong": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

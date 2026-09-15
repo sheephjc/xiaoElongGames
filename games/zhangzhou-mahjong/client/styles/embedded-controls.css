@@ -1,0 +1,12 @@
+/* The platform's corner return button shares the table with native controls. */
+@media (max-width: 1024px) and (hover: none) and (pointer: coarse) {
+  body.mahjong-embedded #mobile-leave-room-btn {
+    right: calc(max(2px, env(safe-area-inset-right, 0px) + 2px) + 60px);
+  }
+  body.mahjong-embedded #mobile-trustee-btn {
+    right: calc(max(2px, env(safe-area-inset-right, 0px) + 2px) + 126px);
+  }
+  body.mahjong-embedded #mobile-ai-speed-toggle-btn {
+    right: calc(max(2px, env(safe-area-inset-right, 0px) + 2px) + 236px);
+  }
+}

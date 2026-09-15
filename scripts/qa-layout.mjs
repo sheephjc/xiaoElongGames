@@ -6,10 +6,12 @@ import { chromium } from 'playwright';
 
 const BASE = process.env.TM_WEB ?? 'http://127.0.0.1:5173';
 const VIEWPORTS = [
+  { w: 1920, h: 1080, name: '大桌面' },
   { w: 1440, h: 900, name: '桌面' },
   { w: 1024, h: 768, name: '平板横屏' },
   { w: 768, h: 1024, name: '平板竖屏' },
   { w: 390, h: 844, name: '手机' },
+  { w: 844, h: 390, name: '手机横屏' },
 ];
 
 let failed = false;
@@ -24,16 +26,16 @@ try {
     const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h } });
     const page = await ctx.newPage();
 
-    // 设置页
+    // 首页
     await page.goto(BASE);
-    await page.waitForSelector('.setup-panel');
+    await page.waitForSelector('.home[data-panel="main"]');
     let overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    if (overflow > 1) fail(`设置页 ${vp.name}(${vp.w}px) 横向溢出 ${overflow}px`);
+    if (overflow > 1) fail(`首页 ${vp.name}(${vp.w}px) 横向溢出 ${overflow}px`);
 
     // 对局页（经大厅 → 出包魔法师 → 单人）
-    await page.click('button.primary-btn.big');
-    await page.waitForSelector('.hall-page');
-    await page.click('.hall-card.playable');
+    await page.click('[data-home-entry="hall"]');
+    await page.waitForSelector('.home[data-panel="hall"]');
+    await page.click('.home-game[data-game-id="trouble-magician"]');
     await page.waitForSelector('.detail-panel');
     await page.click('button:has-text("开始（本地 vs AI）")');
     await page.waitForSelector('.game-page');
@@ -44,7 +46,7 @@ try {
     if (magicBtns !== 8) fail(`对局页 ${vp.name} 魔法按钮应 8 个，实际 ${magicBtns}`);
 
     await ctx.close();
-    console.log(`✅ ${vp.name}（${vp.w}×${vp.h}）：设置页/对局页无横向溢出，8 个魔法按钮完整`);
+    console.log(`✅ ${vp.name}（${vp.w}×${vp.h}）：首页/对局页无横向溢出，8 个魔法按钮完整`);
   }
 } finally {
   await browser.close();

@@ -1,0 +1,249 @@
+/* Shared by the magician's local and online tables; other games keep their styles. */
+body[data-app-theme='magician'] { background: #f1eee4; }
+.magician-table {
+  --text: #303f35;
+  --muted: #697268;
+  --muted2: #7c8378;
+  --accent: #92652f;
+  --accent2: #426a50;
+  --border: #d9dccd;
+  --bg2: #f7f6ee;
+  --panel: #fffdf6;
+  --panel2: #f3f3e8;
+  --ok: #487653;
+  --danger: #b15346;
+  color: var(--text);
+  color-scheme: light;
+  isolation: isolate;
+  position: relative;
+  max-width: 1500px;
+  min-height: 100svh;
+  padding: calc(24px + env(safe-area-inset-top)) clamp(16px, 3vw, 48px) calc(28px + env(safe-area-inset-bottom));
+  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: 22px;
+}
+.magician-table.no-log { grid-template-columns: minmax(0, 1fr); }
+.magician-table .topbar {
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 4px 0 20px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #d7d9cb;
+  border-radius: 0;
+  box-shadow: none;
+}
+.magician-table .topbar-title {
+  margin: 0;
+  font-family: 'Songti SC', STSong, SimSun, serif;
+  font-size: clamp(22px, 2vw, 28px);
+  letter-spacing: .04em;
+  text-shadow: none;
+}
+.magician-table .topbar-info { gap: 6px 16px; }
+.magician-table .chip-info {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.magician-table .chip-info b { color: var(--text); font-variant-numeric: tabular-nums; }
+.magician-table .chip-info.online { color: var(--accent2); }
+.magician-table .table-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.magician-table .ghost-btn {
+  background: #f8f7ef;
+  color: var(--muted);
+  border: 1px solid #d9dccf;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  transition: background-color 160ms, border-color 160ms;
+}
+.magician-table .ghost-btn[aria-pressed='true'] { background: #e3eadb; color: #42634a; border-color: #c9d5bf; }
+.magician-table .ghost-btn:hover { background: #e8ecdf; border-color: #b7c4af; color: #365540; }
+.magician-table button:focus-visible { outline: 3px solid #a0783f; outline-offset: 3px; }
+.magician-table .board {
+  padding: clamp(14px, 2vw, 24px);
+  border: 1px solid #ccd5bf;
+  border-radius: 22px;
+  background: #e6ecdc;
+  gap: 24px;
+}
+.magician-table .opponents { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.magician-table .opponents > .seat:only-child { grid-column: 1 / -1; }
+.magician-table .seat {
+  min-width: 0;
+  padding: 16px;
+  gap: 14px;
+  background: #fffdf5;
+  border: 1px solid #d5daca;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 #d6ddcd;
+}
+.magician-table .seat.you { border: 1px solid #98af8b; background: #fffef8; box-shadow: 0 3px 0 #bdccaf; }
+.magician-table .seat.current { border-color: #b39754; box-shadow: 0 3px 0 #c9bb85; animation: none; }
+.magician-table .seat.shaking { animation: seatShake .4s ease; }
+.magician-table .seat.dead { filter: none; opacity: .7; }
+.magician-table .seat-top { gap: 10px; align-items: flex-start; }
+.magician-table .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  font-size: 16px;
+  box-shadow: none;
+  background: #e0e8d5;
+  color: #486447;
+}
+.magician-table .av-bot { background: #f1e7cf; color: #8c7043; }
+.magician-table .seat-name { font-size: 14px; gap: 5px; overflow-wrap: anywhere; }
+.magician-table .bot-tag, .magician-table .rel-tag, .magician-table .turn-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #eff1e7;
+  color: #718168;
+  font-weight: 500;
+  animation: none;
+}
+.magician-table .turn-tag { color: #8b6b2f; background: #f4eacd; }
+.magician-table .conn-tag { font-size: 10px; color: #916332; background: #f6ead6; border-color: #e4d2b1; }
+.magician-table .seat-score { white-space: nowrap; font-size: 11px; color: #8d774d; }
+.magician-table .seat-score b { font-size: 20px; font-weight: 600; }
+.magician-table .hpbar { height: 14px; margin-top: 7px; background: #edece1; }
+.magician-table .hpfill.ok { background: #91b485; }
+.magician-table .hpfill.warn { background: #d2b565; }
+.magician-table .hpfill.danger { background: #ce9180; }
+.magician-table .hptext { color: #394433; font-size: 10px; font-weight: 600; text-shadow: none; }
+.magician-table .secret-badge { font-size: 10px; background: #f6f3e6; border: 0; padding: 4px 6px; max-width: 130px; flex-wrap: wrap; }
+.magician-table .hand-fan { gap: 7px; }
+.magician-table .hand-fan .card + .card { margin-left: 0; }
+.magician-table .card {
+  --card-tone: #70896b;
+  --card-tint: #edf1e5;
+  width: 70px;
+  height: 98px;
+  background: var(--card-tint);
+  border: 1px solid #d3d9c6;
+  border-bottom: 3px solid var(--card-tone);
+  border-radius: 9px;
+  box-shadow: inset 0 0 0 4px #fffdf5, 0 2px 3px #33402a0a;
+  gap: 9px;
+}
+.magician-table .card.small { width: 54px; height: 76px; border-radius: 8px; gap: 7px; }
+.magician-table .card-emoji { font-size: 30px; filter: none; }
+.magician-table .card.small .card-emoji { font-size: 24px; }
+.magician-table .card-name, .magician-table .card.small .card-name { display: block; font-size: 10px; color: #4d5749; text-shadow: none; }
+.magician-table .card.small .card-name { font-size: 9px; }
+.magician-table .card:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 4px #fffdf5, 0 5px 10px #33402a14; }
+.magician-table .card-back {
+  background: repeating-linear-gradient(45deg, #ffffff05 0 6px, transparent 6px 12px), #55765b;
+  border-color: #46644b;
+  box-shadow: inset 0 0 0 4px #55765b, inset 0 0 0 5px #cfcca180;
+}
+.magician-table .card-back-glyph { color: #e6d6a1; font-size: 26px; animation: none; }
+.magician-table .secret-badge .card.small { width: 28px; height: 38px; border-width: 1px; box-shadow: none; }
+.magician-table .secret-badge .card.small .card-name { display: none; }
+.magician-table .secret-badge .card.small .card-emoji { font-size: 16px; }
+.magician-table .dead-mark { color: #746b5b; background: #eeeee5c9; text-shadow: none; font-size: 18px; }
+.magician-table .your-zone { gap: 14px; }
+.magician-table .turn-status { text-align: left; padding: 12px 16px; background: #dbe5cf; border-radius: 10px; }
+.magician-table .your-turn { color: #365b3c; font-size: 14px; text-shadow: none; animation: none; }
+.magician-table .wait-turn { color: #63715b; font-size: 13px; }
+.magician-table .action-heading { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.magician-table .action-heading h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.magician-table .action-heading span { color: #75806c; font-size: 11px; line-height: 1.6; }
+.magician-table .action-bar { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.magician-table .magic-btn {
+  --card-tone: #70896b;
+  --card-tint: #edf1e5;
+  min-height: 98px;
+  padding: 14px 5px 10px;
+  gap: 8px;
+  background: #fffdf5;
+  border: 1px solid #d2d9c5;
+  border-bottom: 3px solid var(--card-tone);
+  border-radius: 10px;
+  box-shadow: none;
+}
+.magician-table .magic-btn:hover:not(:disabled) { background: var(--card-tint); border-color: var(--card-tone); box-shadow: 0 4px 8px #46543b10; transform: translateY(-2px); }
+.magician-table .magic-btn:disabled { opacity: .58; cursor: not-allowed; }
+.magician-table .magic-btn.last { background: var(--card-tint); border-color: var(--card-tone); box-shadow: none; }
+.magician-table .mb-emoji { font-size: 27px; filter: none; }
+.magician-table .mb-name { font-size: 12px; }
+.magician-table .mb-count { top: 5px; right: 6px; padding: 0; background: transparent; color: #7a8373; font-size: 9px; }
+.magician-table .mb-count.zero { color: var(--danger); box-shadow: none; }
+.magician-table .mb-lock { bottom: auto; top: 5px; left: 6px; right: auto; font-size: 9px; }
+.magician-table .end-btn { grid-column: 1 / -1; padding: 12px; background: #f5f4e9; border: 1px solid #c7d0bd; color: #586e4f; font-size: 13px; }
+.magician-table .restrict-hint { color: #806336; background: #f6edd6; border-color: #e0d2ac; font-size: 12px; line-height: 1.7; }
+.magician-table :is(.card-dragon, .card-btn-dragon) { --card-tone: #bb776b; --card-tint: #f6e5df; }
+.magician-table :is(.card-ghost, .card-btn-ghost) { --card-tone: #9282aa; --card-tint: #eee9f3; }
+.magician-table :is(.card-dream, .card-btn-dream) { --card-tone: #c08c9e; --card-tint: #f5e7ed; }
+.magician-table :is(.card-owl, .card-btn-owl) { --card-tone: #b59a61; --card-tint: #f3eddc; }
+.magician-table :is(.card-storm, .card-btn-storm) { --card-tone: #739d99; --card-tint: #e4efea; }
+.magician-table :is(.card-blizzard, .card-btn-blizzard) { --card-tone: #8fa6b8; --card-tint: #e9eff4; }
+.magician-table :is(.card-fire, .card-btn-fire) { --card-tone: #c09161; --card-tint: #f7eadc; }
+.magician-table :is(.card-potion, .card-btn-potion) { --card-tone: #8fa276; --card-tint: #ecf0df; }
+.magician-table .log-panel { background: #fffdf5; border-color: #d8ddcf; padding: 18px; border-radius: 14px; top: 20px; max-height: calc(100svh - 40px); }
+.magician-table .log-panel h3 { font-size: 14px; margin-bottom: 16px; }
+.magician-table .log-line { background: transparent; padding: 6px 0; border-radius: 0; border-bottom: 1px solid #eeeee4; color: #6f786a; font-size: 12px; }
+.magician-table .ev-cast, .magician-table .ev-heal { color: #527853; }
+.magician-table .ev-fail, .magician-table .ev-damage { color: #ac6350; }
+.magician-table :is(.ev-roundStart, .ev-roundEnd, .ev-gameOver) { color: #937540; }
+.magician-table .panel { background: #fffdf5; border: 1px solid #d7dccb; box-shadow: 0 10px 30px #33402a14; border-radius: 16px; }
+.magician-table .round-panel { position: static; grid-column: 1 / -1; width: auto; max-height: none; text-align: left; padding: 24px; animation: none; }
+.magician-table .round-panel h2 { font-size: 20px; }
+.magician-table .round-panel .primary-btn { width: auto; margin-top: 16px; }
+.magician-table .primary-btn { background: #526f48; color: #fffdf5; border-radius: 9px; padding: 12px 20px; font-size: 13px; }
+.magician-table .reveal-row { align-items: flex-start; }
+.magician-table .reveal-name { min-width: 70px; max-width: 110px; overflow-wrap: anywhere; }
+.magician-table .reveal-cards { min-width: 0; }
+.magician-table .overlay { background: #35402b66; padding: 16px; }
+.magician-table .overlay-panel { max-height: calc(100svh - 32px); overflow-y: auto; }
+.magician-table .winner { color: #8c733d; font-size: 19px; }
+.magician-table .overlay-btns { flex-wrap: wrap; }
+.magician-table .dice-box { background: none; border: 0; color: #695a38; box-shadow: none; }
+.magician-table .full-fx { animation: none; padding: 16px; gap: 22px; }
+.magician-table .full-fx .dice-box { position: relative; z-index: 1; padding: 0; border-radius: 0; }
+.magician-table .dice-label { font-size: 16px; letter-spacing: 0; }
+.magician-table .dice-cube { font-size: clamp(52px, 8svh, 72px); }
+.magician-table .dice-num { font-size: clamp(56px, 9svh, 80px); color: #927036; text-shadow: none; }
+.magician-table .float-fx { text-shadow: 0 1px 3px #fffdf5; }
+.magician-table .full-fx.success { background: #edf2df99; }
+.magician-table .full-fx.fail { background: #f7e7dd99; }
+.magician-table .fx-rays { opacity: .35; width: min(900px, 100vw); height: min(900px, 100vw); }
+.magician-table .full-fx .fx-plate { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; max-width: calc(100vw - 32px); }
+.magician-table .fx-badge { background: none; color: #87703b; font-size: clamp(16px, 2.5svh, 20px); letter-spacing: 0; padding: 0; border-radius: 0; }
+.magician-table .full-fx.fail .fx-badge { background: none; color: #a5654c; }
+.magician-table .fx-emoji { font-size: clamp(80px, 14svh, 128px); filter: none; }
+.magician-table .fx-name { font-size: clamp(30px, 4.5svh, 40px); color: #4d5940; text-shadow: none; }
+.magician-table .fx-text { font-size: clamp(20px, 3svh, 24px); color: #7e856c; text-shadow: none; }
+@media (max-width: 1100px) {
+  .magician-table { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .magician-table .log-panel { position: static; max-height: 260px; }
+}
+@media (max-width: 600px) {
+  .magician-table { padding: calc(16px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom)); gap: 16px; }
+  .magician-table .topbar { gap: 12px; padding-bottom: 16px; }
+  .magician-table .topbar-info { flex-basis: 100%; order: 2; gap: 6px 12px; }
+  .magician-table .table-tools { margin-left: auto; }
+  .magician-table .ghost-btn { font-size: 11px; padding: 7px 9px; }
+  .magician-table .board { padding: 12px; border-radius: 16px; gap: 20px; }
+  .magician-table .opponents { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .magician-table .seat { padding: 12px; }
+  .magician-table .hand-fan { gap: 6px; }
+  .magician-table .card.small { width: 50px; height: 70px; }
+  .magician-table .action-bar { gap: 7px; }
+  .magician-table .magic-btn { min-height: 92px; gap: 8px; }
+  .magician-table .mb-name { font-size: 10px; }
+  .magician-table .action-heading { gap: 6px; }
+  .magician-table .round-panel { padding: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .magician-table *, .magician-table *::before, .magician-table *::after { animation: none !important; transition: none !important; }
+  .magician-table .card:hover, .magician-table .magic-btn:hover:not(:disabled), .magician-table .magic-btn:active:not(:disabled) { transform: none; }
+}
+.magician-table[data-motion='off'] *, .magician-table[data-motion='off'] *::before, .magician-table[data-motion='off'] *::after { animation: none; transition: none; }
+.magician-table[data-motion='off'] .card:hover, .magician-table[data-motion='off'] .magic-btn:hover:not(:disabled), .magician-table[data-motion='off'] .magic-btn:active:not(:disabled) { transform: none; }

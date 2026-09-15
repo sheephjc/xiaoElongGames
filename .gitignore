@@ -20,3 +20,5 @@ release/
 # 构建/工具缓存
 *.tsbuildinfo
 .vite/
+output/
+.playwright-cli/

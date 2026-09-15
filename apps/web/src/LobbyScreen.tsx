@@ -3,6 +3,7 @@ import { AUTOPILOT_LABELS, type AutopilotMode, type RoomListItem } from '@tm/rul
 import type { RemoteApi } from './useRemoteGame';
 import { lastSavedRoom } from './useRemoteGame';
 import { AI_SPEED_PRESETS } from './GameSettings';
+import GameLobbyHeader from './GameLobbyHeader';
 
 export default function LobbyScreen({
   remote,
@@ -45,11 +46,13 @@ export default function LobbyScreen({
     const total = remote.lobby.players.length;
     const st = remote.lobby.settings;
     return (
-      <div className="page lobby-page">
+      <div className="page lobby-page game-foyer game-foyer--magician foyer-room">
         <div className="panel lobby-panel">
-          <h1>🧙 联机大厅</h1>
+          <GameLobbyHeader game="magician" room />
           <div className="room-code" title="点击复制">
-            <span className="rc-label">房间码{remote.lobby.hasPassword ? ' 🔒（有密码）' : ''}</span>
+            <span className="rc-label">
+              房间码{remote.lobby.hasPassword ? ' 🔒（有密码）' : ''}
+            </span>
             <button className="rc-code" onClick={copyCode}>
               {remote.lobby.code} <span className="rc-copy">📋</span>
             </button>
@@ -122,7 +125,9 @@ export default function LobbyScreen({
                     className="code-input"
                     value={createPw}
                     maxLength={16}
-                    placeholder={remote.lobby.hasPassword ? '已设密码（输入新密码覆盖）' : '留空 = 无密码'}
+                    placeholder={
+                      remote.lobby.hasPassword ? '已设密码（输入新密码覆盖）' : '留空 = 无密码'
+                    }
                     onChange={(e) => setCreatePw(e.target.value)}
                   />
                   <button
@@ -181,10 +186,9 @@ export default function LobbyScreen({
   // 只显示出包魔法师的房间（realtime 房间在各自游戏大厅中列出）
   const rooms = (remote.roomList ?? []).filter((r) => !r.gameId || r.gameId === 'trouble-magician');
   return (
-    <div className="page lobby-page">
+    <div className="page lobby-page game-foyer game-foyer--magician foyer-browser">
       <div className="panel lobby-panel">
-        <h1>🧙 出包魔法师 · 联机</h1>
-        <p className="tagline">加入公开房间，或创建自己的房间</p>
+        <GameLobbyHeader game="magician" />
 
         <div className="room-list-block">
           <div className="rl-head">
@@ -202,6 +206,15 @@ export default function LobbyScreen({
                   key={r.code}
                   className={selected?.code === r.code ? 'rl-row selected' : 'rl-row'}
                   onClick={() => setSelected(r)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selected?.code === r.code}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelected(r);
+                    }
+                  }}
                 >
                   <span className="rl-lock">{r.hasPassword ? '🔒' : '🔓'}</span>
                   <span className="rl-code">{r.code}</span>
@@ -313,7 +326,8 @@ export default function LobbyScreen({
             onChange={(e) => onServerUrlChange(e.target.value)}
           />
           <p className="muted">
-            局域网联机：填主机的局域网地址 + 服务端端口；公网服务器：填域名或 IP+端口。修改后重新连接生效。
+            局域网联机：填主机的局域网地址 + 服务端端口；公网服务器：填域名或
+            IP+端口。修改后重新连接生效。
           </p>
         </details>
 

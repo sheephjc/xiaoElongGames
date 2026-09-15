@@ -77,6 +77,36 @@ describe('视角投影', () => {
 });
 
 describe('施法成功', () => {
+  it.each(MAGIC_LIST.map(m => [m.key] as const))('%s 成功时只有巨龙和梦发出掷骰事件', magic => {
+    const g = makeGame(3);
+    forceHand(g, 'p0', [magic, 'potion', 'potion', 'potion', 'potion']);
+    const seq = g.events.at(-1)!.seq;
+    expect(g.declareSpell('p0', magic).ok).toBe(true);
+    const events = g.events.filter(e => e.seq > seq);
+    const dice = events.filter(e => e.type === 'dice');
+    expect(dice).toHaveLength(magic === 'dragon' || magic === 'dream' ? 1 : 0);
+    if (dice.length) {
+      expect(events.findIndex(e => e.type === 'cast')).toBeLessThan(events.indexOf(dice[0]));
+      expect(dice[0]).toMatchObject({ magic, playerId: 'p0' });
+      expect(dice[0].amount).toBeGreaterThanOrEqual(1);
+      expect(dice[0].amount).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it.each(MAGIC_LIST.map(m => [m.key] as const))('%s 失败时只有巨龙掷骰，其他魔法固定扣一点血', magic => {
+    const g = makeGame(3);
+    forceHand(g, 'p0', [magic === 'potion' ? 'fire' : 'potion']);
+    const seq = g.events.at(-1)!.seq;
+    expect(g.declareSpell('p0', magic).ok).toBe(true);
+    const events = g.events.filter(e => e.seq > seq);
+    const dice = events.filter(e => e.type === 'dice');
+    expect(dice).toHaveLength(magic === 'dragon' ? 1 : 0);
+    if (magic === 'dragon') {
+      expect(events.findIndex(e => e.type === 'fail')).toBeLessThan(events.indexOf(dice[0]));
+      expect(g.player('p0').hp).toBe(6 - dice[0].amount!);
+    } else expect(g.player('p0').hp).toBe(5);
+  });
+
   it('打出对应牌并结算效果', () => {
     const g = makeGame(4, 7);
     const p0 = g.player('p0');

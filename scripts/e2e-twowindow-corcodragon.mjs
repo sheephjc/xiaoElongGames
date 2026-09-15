@@ -14,10 +14,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function toFightDetail(page) {
   await page.goto(BASE);
-  await page.waitForSelector('.setup-panel');
-  await page.click('button.primary-btn.big');
-  await page.waitForSelector('.hall-page');
-  await page.locator('.hall-card').filter({ hasText: '鳄龙咆哮' }).click();
+  await page.waitForSelector('.home[data-panel="main"]');
+  await page.click('[data-home-entry="hall"]');
+  await page.waitForSelector('.home[data-panel="hall"]');
+  await page.locator('.home-game').filter({ hasText: '鳄龙咆哮' }).click();
   await page.waitForSelector('.ccf-detail-panel');
 }
 

@@ -21,11 +21,11 @@ try {
   // 进入联机页面的公共路径：设置页（填昵称）→ 游戏大厅 → 出包魔法师 → 联机对战
   async function enterOnline(page, name) {
     await page.goto(BASE);
-    await page.waitForSelector('.setup-panel');
-    await page.fill('.setup-panel input:first-of-type', name);
-    await page.click('button.primary-btn.big'); // 进入游戏大厅
-    await page.waitForSelector('.hall-page');
-    await page.click('.hall-card.playable'); // 出包魔法师
+    await page.waitForSelector('.home[data-panel="main"]');
+    await page.fill('.home-name input', name);
+    await page.click('[data-home-entry="hall"]'); // 进入游戏大厅
+    await page.waitForSelector('.home[data-panel="hall"]');
+    await page.click('.home-game[data-game-id="trouble-magician"]'); // 出包魔法师
     await page.waitForSelector('.detail-panel');
     await page.click('button:has-text("🌐 进入联机大厅")');
     await page.waitForSelector('.lobby-panel');

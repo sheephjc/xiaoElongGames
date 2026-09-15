@@ -28,16 +28,16 @@ try {
     const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h } });
     const page = await ctx.newPage();
     await page.goto(BASE);
-    await page.waitForSelector('.setup-panel');
-    await page.click('button.primary-btn.big');
-    await page.waitForSelector('.hall-page');
+    await page.waitForSelector('.home[data-panel="main"]');
+    await page.click('[data-home-entry="hall"]');
+    await page.waitForSelector('.home[data-panel="hall"]');
 
     let overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     if (overflow > 1) fail(`大厅 ${vp.name}(${vp.w}px) 横向溢出 ${overflow}px`);
 
-    await page.locator('.hall-card').filter({ hasText: '鳄龙战场' }).click();
+    await page.locator('.home-game').filter({ hasText: '鳄龙战场' }).click();
     await page.waitForSelector('.cdf-detail-panel');
     overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

@@ -11,6 +11,7 @@ import {
 import { HpBar, MagicCard } from './components';
 import { playSfx, setSoundEnabled } from './fx';
 import type { GameSettings } from './GameSettings';
+import { collectSpellEffects, DICE_DELAY_MS, DICE_VISIBLE_MS, type SpellEffect } from './spellEffects';
 
 /** 本地与联机共用的游戏操作接口 */
 export interface GameApi {
@@ -54,7 +55,7 @@ function SecretBadge({ seat, isYou }: { seat: SeatView; isYou: boolean }) {
       </div>
     );
   }
-  return <div className="secret-badge">🤫 ×{seat.secretCount}</div>;
+  return <div className="secret-badge">秘密牌 {seat.secretCount} 张</div>;
 }
 
 /** 轮末/终局复盘：展示所有玩家的手牌 */
@@ -74,7 +75,7 @@ function RevealHands({ seats }: { seats: SeatView[] }) {
               <MagicCard key={i} magic={m} small />
             ))}
             {s.handCount === 0 && <span className="empty-hand">无手牌</span>}
-            {s.secretCount > 0 && <span className="reveal-secret">🤫×{s.secretCount}</span>}
+            {s.secretCount > 0 && <span className="reveal-secret">秘密牌 {s.secretCount} 张</span>}
           </span>
         </div>
       ))}
@@ -114,7 +115,7 @@ function Seat({
         <div className="seat-info">
           <div className="seat-name">
             {seat.name}
-            {seat.isBot && <span className="bot-tag">🤖</span>}
+            {seat.isBot && <span className="bot-tag">AI</span>}
             {connInfo && !connInfo.connected && !connInfo.autopilot && (
               <span className="conn-tag waiting">⏳ 断线等待重连</span>
             )}
@@ -123,20 +124,20 @@ function Seat({
             )}
             {isPrev && (
               <span className="rel-tag" title="你的上家">
-                🌨️上家
+                上家
               </span>
             )}
             {isNext && (
               <span className="rel-tag" title="你的下家">
-                🔥下家
+                下家
               </span>
             )}
-            {isCurrent && <span className="turn-tag">⏳施法中</span>}
+            {isCurrent && <span className="turn-tag">施法中</span>}
           </div>
           <HpBar hp={seat.hp} shaking={shaking} />
         </div>
         <div className="seat-side">
-          <div className="seat-score">⭐ {seat.score}</div>
+          <div className="seat-score"><b>{seat.score}</b> 分</div>
           <SecretBadge seat={seat} isYou={isYou} />
         </div>
       </div>
@@ -146,7 +147,7 @@ function Seat({
         ))}
         {seat.handCount === 0 && <span className="empty-hand">无手牌</span>}
       </div>
-      {!seat.alive && <div className="dead-mark">💀 已倒下</div>}
+      {!seat.alive && <div className="dead-mark">本轮出局</div>}
       {floats.map((f) => (
         <span key={f.key} className={`float-fx ${f.kind}`}>
           {f.text}
@@ -183,13 +184,43 @@ export default function GameTable({
 }) {
   const [floats, setFloats] = useState<FloatFx[]>([]);
   const [shake, setShake] = useState<{ seatId: string; key: number } | null>(null);
-  const [fullFx, setFullFx] = useState<{ magic: Magic; fail: boolean; key: number } | null>(null);
-  const [dice, setDice] = useState<{ amount: number; key: number } | null>(null);
+  const [fullFx, setFullFx] = useState<SpellEffect | null>(null);
+  const [diceVisible, setDiceVisible] = useState(false);
+  const spellQueue = useRef<SpellEffect[]>([]);
+  const presenting = useRef(false);
+  const timers = useRef(new Set<number>());
   const [confetti, setConfetti] = useState(false);
   const prevSeq = useRef<number | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const fxOn = useRef(settings.fx);
   fxOn.current = settings.fx;
+
+  function later(action: () => void, delay: number) {
+    const timer = window.setTimeout(() => {
+      timers.current.delete(timer);
+      action();
+    }, delay);
+    timers.current.add(timer);
+  }
+
+  function clearEffects() {
+    timers.current.forEach(clearTimeout);
+    timers.current.clear();
+    spellQueue.current = [];
+    presenting.current = false;
+  }
+
+  useEffect(() => clearEffects, []);
+
+  useEffect(() => {
+    if (settings.fx) return;
+    clearEffects();
+    setFullFx(null);
+    setDiceVisible(false);
+    setFloats([]);
+    setShake(null);
+    setConfetti(false);
+  }, [settings.fx]);
 
   useEffect(() => {
     setSoundEnabled(settings.sound);
@@ -212,14 +243,42 @@ export default function GameTable({
     }
     const fresh = view.events.filter((e) => e.seq > prevSeq.current!);
     prevSeq.current = last;
+    const spells = collectSpellEffects(fresh);
+    if (fxOn.current) {
+      spellQueue.current.push(...spells);
+      if (!presenting.current) presentNextSpell();
+    } else {
+      for (const spell of spells) {
+        playSfx(spell.fail ? 'fail' : 'cast');
+        if (spell.dice != null) later(() => playSfx('dice'), DICE_DELAY_MS);
+      }
+    }
     for (const e of fresh) handleFx(e);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view?.turnNo, view?.events.length]);
+  }, [view?.events.at(-1)?.seq]);
 
   // 战报自动滚动
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
-  }, [view?.events.length]);
+  }, [view?.events.at(-1)?.seq]);
+
+  function presentNextSpell() {
+    const spell = spellQueue.current.shift();
+    presenting.current = !!spell;
+    setFullFx(spell ?? null);
+    setDiceVisible(false);
+    if (!spell) return;
+    playSfx(spell.fail ? 'fail' : 'cast');
+    if (spell.dice != null) {
+      later(() => {
+        playSfx('dice');
+        setDiceVisible(true);
+      }, DICE_DELAY_MS);
+    }
+    later(presentNextSpell, spell.dice != null
+      ? DICE_DELAY_MS + DICE_VISIBLE_MS
+      : spell.fail ? 1800 : 1500);
+  }
 
   function handleFx(e: EffectEvent) {
     const fx = fxOn.current;
@@ -231,7 +290,7 @@ export default function GameTable({
         const key = e.seq;
         setFloats((f) => [...f, { key, seatId: e.targetId!, text: `-${e.amount ?? 1}`, kind: 'damage' }]);
         setShake({ seatId: e.targetId!, key });
-        window.setTimeout(() => {
+        later(() => {
           setFloats((f) => f.filter((x) => x.key !== key));
           setShake((s) => (s?.key === key ? null : s));
         }, 1400);
@@ -243,35 +302,7 @@ export default function GameTable({
         if (!fx) break;
         const key = e.seq;
         setFloats((f) => [...f, { key, seatId: e.targetId!, text: `+${e.amount}`, kind: 'heal' }]);
-        window.setTimeout(() => setFloats((f) => f.filter((x) => x.key !== key)), 1400);
-        break;
-      }
-      case 'cast': {
-        playSfx('cast');
-        if (fx && e.magic) {
-          const key = e.seq;
-          setFullFx({ magic: e.magic, fail: false, key });
-          window.setTimeout(() => setFullFx((b) => (b?.key === key ? null : b)), 1500);
-        }
-        break;
-      }
-      case 'fail': {
-        playSfx('fail');
-        if (fx && e.magic) {
-          const key = e.seq;
-          setFullFx({ magic: e.magic, fail: true, key });
-          window.setTimeout(() => setFullFx((b) => (b?.key === key ? null : b)), 1800);
-        }
-        break;
-      }
-      case 'dice': {
-        if (e.amount == null) break;
-        playSfx('dice');
-        if (fx) {
-          const key = e.seq;
-          setDice({ amount: e.amount, key });
-          window.setTimeout(() => setDice((d) => (d?.key === key ? null : d)), 1300);
-        }
+        later(() => setFloats((f) => f.filter((x) => x.key !== key)), 1400);
         break;
       }
       case 'turnStart':
@@ -302,7 +333,7 @@ export default function GameTable({
     [],
   );
 
-  if (!view) return <div className="page">加载中……</div>;
+  if (!view) return <div className="app-loading" role="status">加载中……</div>;
 
   const you = view.seats.find((s) => s.id === view.youId)!;
   const others = view.seats.filter((s) => s.id !== view.youId);
@@ -314,28 +345,30 @@ export default function GameTable({
   const hideOwnHand = view.phase === 'playing';
 
   return (
-    <div className={`page game-page ${settings.showLog ? '' : 'no-log'}`}>
+    <div className={`page game-page magician-table ${settings.showLog ? '' : 'no-log'}`} data-motion={settings.fx ? 'on' : 'off'}>
       <header className="topbar">
-        <div className="topbar-title">🧙 出包魔法师</div>
+        <h1 className="topbar-title">出包魔法师</h1>
         <div className="topbar-info">
-          <span className="chip-info">🏷️ 第 {view.round} 轮</span>
-          <span className="chip-info">🎴 剩余牌堆 {view.deckCount}</span>
-          <span className="chip-info">🤫 秘密 {view.secretPileCount}</span>
-          <span className="chip-info">🗑️ 弃牌 {view.discard.length}</span>
-          {online && <span className="chip-info online">🌐 联机</span>}
+          <span className="chip-info">第 <b>{view.round}</b> 轮</span>
+          <span className="chip-info">牌堆 <b>{view.deckCount}</b></span>
+          <span className="chip-info">秘密 <b>{view.secretPileCount}</b></span>
+          <span className="chip-info">弃牌 <b>{view.discard.length}</b></span>
+          {online && <span className="chip-info online">联机</span>}
         </div>
-        <button className="ghost-btn" title={settings.showLog ? '隐藏战报（凭记忆推理）' : '显示战报'} onClick={onToggleLog}>
-          {settings.showLog ? '📜' : '📕'}
-        </button>
-        <button className="ghost-btn" title={settings.sound ? '关闭音效' : '开启音效'} onClick={onToggleSound}>
-          {settings.sound ? '🔊' : '🔇'}
-        </button>
-        <button className="ghost-btn" title={settings.fx ? '关闭动画' : '开启动画'} onClick={onToggleFx}>
-          {settings.fx ? '✨' : '💤'}
-        </button>
-        <button className="ghost-btn" onClick={onExit}>
-          退出
-        </button>
+        <div className="table-tools">
+          <button className="ghost-btn" aria-label="战报" aria-pressed={settings.showLog} title={settings.showLog ? '隐藏战报（凭记忆推理）' : '显示战报'} onClick={onToggleLog}>
+            战报
+          </button>
+          <button className="ghost-btn" aria-label="音效" aria-pressed={settings.sound} title={settings.sound ? '关闭音效' : '开启音效'} onClick={onToggleSound}>
+            音效
+          </button>
+          <button className="ghost-btn" aria-label="动效" aria-pressed={settings.fx} title={settings.fx ? '关闭动画' : '开启动画'} onClick={onToggleFx}>
+            动效
+          </button>
+          <button className="ghost-btn" onClick={onExit}>
+            退出
+          </button>
+        </div>
       </header>
 
       <main className="board">
@@ -360,12 +393,12 @@ export default function GameTable({
         </div>
 
         <div className="your-zone">
-          <div className="turn-status">
+          <div className="turn-status" role="status" aria-live="polite">
             {view.isYourTurn ? (
-              <span className="your-turn">✨ 轮到你施法了！大声喊出魔法名！</span>
+              <span className="your-turn">轮到你了，选择要施放的魔法</span>
             ) : (
               <span className="wait-turn">
-                ⏳ 等待 {view.currentPlayerId ? view.seats.find((s) => s.id === view.currentPlayerId)?.name : '……'} 施法中
+                {view.phase !== 'playing' ? '本轮已结束，可以查看手牌' : `等待 ${view.currentPlayerId ? view.seats.find((s) => s.id === view.currentPlayerId)?.name : '……'} 施法`}
               </span>
             )}
           </div>
@@ -383,6 +416,7 @@ export default function GameTable({
               return cp ? { connected: cp.connected, autopilot: cp.autopilot } : undefined;
             })()}
           />
+          <div className="action-heading"><h2>施放魔法</h2><span>你的手牌背对自己，观察其他玩家的牌来判断。</span></div>
           <div className="action-bar">
             {MAGIC_LIST.map((m) => {
               const legal = view.legalMagics.includes(m.key);
@@ -404,7 +438,7 @@ export default function GameTable({
               );
             })}
             <button className="end-btn" disabled={!view.isYourTurn} onClick={api.endTurn}>
-              ⏭️ 结束回合
+              结束回合
             </button>
           </div>
           {view.isYourTurn && view.lastMagic && (
@@ -442,17 +476,15 @@ export default function GameTable({
               {fullFx.fail ? '施放失败！' : '施放成功！'}
             </span>
           </div>
-        </div>
-      )}
-      {dice && (
-        <div className="dice-overlay" key={dice.key}>
-          <div className="dice-box">
-            <span className="dice-label">🎲 掷骰子</span>
-            <div className="dice-row">
-              <span className="dice-cube">🎲</span>
-              <span className="dice-num">{dice.amount}</span>
+          {diceVisible && fullFx.dice != null && (
+            <div className="dice-box" role="status">
+              <span className="dice-label">掷骰子</span>
+              <div className="dice-row">
+                <span className="dice-cube" aria-hidden="true">🎲</span>
+                <span className="dice-num">{fullFx.dice}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       {confetti &&

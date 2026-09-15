@@ -21,15 +21,15 @@ try {
   // ---- 设置页 ----
   const page = await ctx.newPage();
   await page.goto(BASE);
-  await page.waitForSelector('.setup-panel');
+  await page.waitForSelector('.home[data-panel="main"]');
   await sleep(400);
   await shot(page, '01-setup');
   console.log('✅ 01-setup');
 
   // ---- 本地对局（经大厅 → 出包魔法师 → 单人） ----
-  await page.click('button.primary-btn.big'); // 进入游戏大厅
-  await page.waitForSelector('.hall-page');
-  await page.click('.hall-card.playable');
+  await page.click('[data-home-entry="hall"]'); // 进入游戏大厅
+  await page.waitForSelector('.home[data-panel="hall"]');
+  await page.click('.home-game[data-game-id="trouble-magician"]');
   await page.waitForSelector('.detail-panel');
   await page.click('button:has-text("开始（本地 vs AI）")');
   await page.waitForSelector('.game-page');
@@ -67,13 +67,13 @@ try {
   const ctx2 = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page2 = await ctx2.newPage();
   await page2.goto(BASE);
-  await page2.waitForSelector('.setup-panel');
-  await page2.click('button.primary-btn.big');
-  await page2.waitForSelector('.hall-page');
+  await page2.waitForSelector('.home[data-panel="main"]');
+  await page2.click('[data-home-entry="hall"]');
+  await page2.waitForSelector('.home[data-panel="hall"]');
   await sleep(400);
   await shot(page2, '05-hall');
   console.log('✅ 05-hall');
-  await page2.click('.hall-card.playable');
+  await page2.click('.home-game[data-game-id="trouble-magician"]');
   await page2.waitForSelector('.detail-panel');
   await page2.click('button:has-text("🌐 进入联机大厅")');
   await page2.waitForSelector('.lobby-panel');

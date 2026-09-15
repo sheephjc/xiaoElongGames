@@ -6,12 +6,16 @@ import { useEffect, useState } from 'react';
 import type { RoomListItem } from '@tm/rules';
 import type { RealtimeApi } from './useRealtimeGame';
 import type { FightConfig } from '@tm/game-corcodragon-fight/GameUI';
+import GameLobbyHeader from './GameLobbyHeader';
 
 const savedLastRoom = (): { code: string; token: string; name: string } | null => {
   try {
     const raw = localStorage.getItem('tm-room-tokens');
     if (!raw) return null;
-    const tokens = JSON.parse(raw) as Record<string, { playerId: string; name: string; ts: number }>;
+    const tokens = JSON.parse(raw) as Record<
+      string,
+      { playerId: string; name: string; ts: number }
+    >;
     let best: { code: string; token: string; name: string; ts: number } | null = null;
     for (const [code, t] of Object.entries(tokens)) {
       if (!best || t.ts > best.ts) best = { code, token: t.playerId, name: t.name, ts: t.ts };
@@ -62,9 +66,9 @@ export default function RealtimeLobbyScreen({
   const effectiveLimit =
     typeof roomConfig?.scoreLimit === 'number' ? roomConfig.scoreLimit : config.scoreLimit;
   const effectiveRespawn =
-    typeof roomConfig?.respawnMs === 'number' ? roomConfig.respawnMs : config.respawnMs ?? 15_000;
+    typeof roomConfig?.respawnMs === 'number' ? roomConfig.respawnMs : (config.respawnMs ?? 15_000);
   const effectiveTickHz =
-    typeof roomConfig?.tickHz === 'number' ? roomConfig.tickHz : config.tickHz ?? 30;
+    typeof roomConfig?.tickHz === 'number' ? roomConfig.tickHz : (config.tickHz ?? 30);
   const effectiveAiStyle = roomConfig?.aiStyle ?? config.aiStyle;
   const effectiveAiLevel = roomConfig?.aiLevel ?? config.aiLevel ?? 'normal';
   const configLabel = `${effectiveMode === 'tdm' ? '🤝 团队死斗' : '🆚 自由混战'} · ${effectiveLimit} 杀 · ${effectiveTickHz}Hz · 复活 ${Math.round(effectiveRespawn / 1000)}s · ${
@@ -78,11 +82,13 @@ export default function RealtimeLobbyScreen({
     const isHost = me?.isHost ?? false;
     const total = remote.lobby.players.length;
     return (
-      <div className="page lobby-page">
+      <div className="page lobby-page game-foyer game-foyer--fight foyer-room">
         <div className="panel lobby-panel">
-          <h1>🐊 鳄龙咆哮 · 联机</h1>
+          <GameLobbyHeader game="fight" room />
           <div className="room-code" title="点击复制">
-            <span className="rc-label">房间码{remote.lobby.hasPassword ? ' 🔒（有密码）' : ''}</span>
+            <span className="rc-label">
+              房间码{remote.lobby.hasPassword ? ' 🔒（有密码）' : ''}
+            </span>
             <button className="rc-code" onClick={copyCode}>
               {remote.lobby.code} <span className="rc-copy">📋</span>
             </button>
@@ -108,7 +114,9 @@ export default function RealtimeLobbyScreen({
               <div className="field">
                 <span>AI 对手数量：{remote.lobby.botCount}</span>
                 <div className="stepper">
-                  <button onClick={() => remote.setBots(Math.max(0, remote.lobby!.botCount - 1))}>−</button>
+                  <button onClick={() => remote.setBots(Math.max(0, remote.lobby!.botCount - 1))}>
+                    −
+                  </button>
                   <button onClick={() => remote.setBots(remote.lobby!.botCount + 1)}>＋</button>
                 </div>
               </div>
@@ -119,7 +127,9 @@ export default function RealtimeLobbyScreen({
                     className="code-input"
                     value={createPw}
                     maxLength={16}
-                    placeholder={remote.lobby.hasPassword ? '已设密码（输入新密码覆盖）' : '留空 = 无密码'}
+                    placeholder={
+                      remote.lobby.hasPassword ? '已设密码（输入新密码覆盖）' : '留空 = 无密码'
+                    }
                     onChange={(e) => setCreatePw(e.target.value)}
                   />
                   <button
@@ -139,12 +149,14 @@ export default function RealtimeLobbyScreen({
                 onClick={remote.start}
                 title={total < 2 ? '至少 2 名玩家（可添加 AI）' : ''}
               >
-                🎮 开始对战（{total} 人 · {configLabel}）
+                🎮 开始对战（{total} 人）
               </button>
             </div>
           )}
           {!isHost && <p className="muted">等待房主开始游戏……</p>}
-          {isHost && remote.lobby.status === 'playing' && <p className="muted">对局进行中，祝你好运！</p>}
+          {isHost && remote.lobby.status === 'playing' && (
+            <p className="muted">对局进行中，祝你好运！</p>
+          )}
 
           {remote.error && <div className="error-box">{remote.error}</div>}
           <button className="ghost-btn" onClick={remote.leave}>
@@ -157,15 +169,17 @@ export default function RealtimeLobbyScreen({
 
   const rooms = (remote.roomList ?? []).filter((r) => r.gameId === 'corcodragon-fight');
   return (
-    <div className="page lobby-page">
+    <div className="page lobby-page game-foyer game-foyer--fight foyer-browser">
       <div className="panel lobby-panel">
-        <h1>🐊 鳄龙咆哮 · 联机</h1>
-        <p className="tagline">加入公开房间，或创建自己的房间（{configLabel}）</p>
+        <GameLobbyHeader game="fight" />
+        <p className="foyer-match-summary">本次房间设置：{configLabel}</p>
 
         <div className="room-list-block">
           <div className="rl-head">
             <span className="rl-title">🏠 房间列表</span>
-            <button className="ghost-btn" onClick={remote.listRooms}>🔄 刷新</button>
+            <button className="ghost-btn" onClick={remote.listRooms}>
+              🔄 刷新
+            </button>
           </div>
           {rooms.length === 0 ? (
             <p className="muted">暂无鳄龙咆哮房间，创建一个吧～</p>
@@ -176,10 +190,21 @@ export default function RealtimeLobbyScreen({
                   key={r.code}
                   className={selected?.code === r.code ? 'rl-row selected' : 'rl-row'}
                   onClick={() => setSelected(r)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selected?.code === r.code}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelected(r);
+                    }
+                  }}
                 >
                   <span className="rl-lock">{r.hasPassword ? '🔒' : '🔓'}</span>
                   <span className="rl-code">{r.code}</span>
-                  <span className="rl-count">👥 {r.playerCount}/{r.maxPlayers}</span>
+                  <span className="rl-count">
+                    👥 {r.playerCount}/{r.maxPlayers}
+                  </span>
                   <span className={r.status === 'playing' ? 'rl-status playing' : 'rl-status'}>
                     {r.status === 'playing' ? '⏳ 对局中' : '等待中'}
                   </span>

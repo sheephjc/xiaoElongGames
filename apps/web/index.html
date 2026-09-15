@@ -2,8 +2,16 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>小鳄龙之家 · 游戏大厅</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#edf0dd" />
+    <style>
+      /* The first paint must match the home theme, before CSS and React load. */
+      html, body { margin: 0; min-height: 100%; background: #edf0dd; }
+      html { color-scheme: light; }
+      #root { min-height: 100vh; min-height: 100svh; }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>小鳄龙之家</title>
   </head>
   <body>
     <div id="root"></div>

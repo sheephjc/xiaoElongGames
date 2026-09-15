@@ -9,7 +9,8 @@ export type SfxName =
   | 'dice'
   | 'roundEnd'
   | 'gameOver'
-  | 'turn';
+  | 'turn'
+  | 'uiConfirm';
 
 let enabled = true;
 
@@ -26,7 +27,9 @@ let ctx: AudioContext | null = null;
 function ac(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   try {
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return null;
     if (!ctx) ctx = new Ctor();
     if (ctx.state === 'suspended') void ctx.resume();
@@ -65,6 +68,10 @@ export function playSfx(name: SfxName): void {
   const c = ac();
   if (!c) return;
   switch (name) {
+    case 'uiConfirm':
+      tone(c, 640, 0, 0.075, 'sine', 0.025);
+      tone(c, 960, 0.04, 0.12, 'sine', 0.02);
+      break;
     case 'cast':
       tone(c, 660, 0, 0.12, 'sine', 0.05);
       tone(c, 990, 0.08, 0.2, 'sine', 0.05);

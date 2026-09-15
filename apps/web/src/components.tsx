@@ -25,7 +25,6 @@ export function MagicCard({
     >
       <span className="card-emoji">{def.emoji}</span>
       <span className="card-name">{def.name}</span>
-      <span className="card-count">×{def.count}</span>
     </div>
   );
 }

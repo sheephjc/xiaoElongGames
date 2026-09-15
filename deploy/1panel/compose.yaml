@@ -1,0 +1,37 @@
+name: xiaoelong_web
+
+services:
+  xiaoelong_web:
+    image: node:22.23.1-bookworm-slim
+    container_name: xiaoelong_web
+    restart: unless-stopped
+    init: true
+    working_dir: /app/apps/server
+    command: ["node", "--import", "tsx", "src/index.ts"]
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "8080"
+      TZ: Asia/Shanghai
+    ports:
+      - "3002:8080"
+    volumes:
+      - /opt/xiaoelong_web:/app:ro
+    networks:
+      - panel
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+networks:
+  panel:
+    external: true
+    name: 1panel-network

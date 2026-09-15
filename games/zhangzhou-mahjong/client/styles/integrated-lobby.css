@@ -1,0 +1,59 @@
+body.lobby-screen {
+  --ink: #2d4835;
+  --muted: #74806b;
+  --accent: #577744;
+  height: auto;
+  min-height: 100dvh;
+  overflow: auto;
+  overscroll-behavior: auto;
+  background: radial-gradient(ellipse at 10% 0%, #fff9e8, transparent 65%), #eff2e8;
+  color: var(--ink);
+}
+body.lobby-screen .page {
+  width: min(960px, calc(100% - 40px));
+  height: auto;
+  max-height: none;
+  margin: 40px auto;
+  gap: 22px;
+  overflow: visible;
+}
+body.lobby-screen .card {
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid #dce3d0;
+  border-radius: 24px;
+  background: #fffef7;
+  box-shadow: 0 8px 30px #374f360d;
+}
+.lobby-screen h1 { color: #345037; font-size: clamp(22px, 3vw, 28px); font-weight: 600; }
+.lobby-screen .field { gap: 8px; margin-top: 20px; }
+.lobby-screen .field span { color: #62715a; font-size: 13px; }
+.lobby-screen .btn {
+  height: 42px;
+  border-color: #d5dfca;
+  border-radius: 999px;
+  background: #f2f6eb;
+  color: #49613d;
+  box-shadow: none;
+  transition: background-color 160ms, border-color 160ms;
+}
+.lobby-screen .btn:hover { border-color: #b7cba5; background: #e6efdc; }
+.lobby-screen .btn-primary { background: #577744; border-color: #577744; color: #fffdf3; }
+.lobby-screen .btn-primary:hover { background: #496737; border-color: #496737; }
+.lobby-screen .btn-danger { background: #fbefeb; border-color: #ecd6ce; color: #9e6554; }
+.lobby-screen .field input { border: 1px solid #d6dfcb; border-radius: 12px; background: #fffefb; color: #345037; }
+.lobby-screen .field input:focus-visible, .lobby-screen .btn:focus-visible { outline: 2px solid #92ac7f; outline-offset: 3px; }
+.lobby-screen .status { margin-top: 16px; }
+body.lobby-screen .battle-seat-section { min-height: 360px; margin-top: 16px; }
+.lobby-screen .battle-seat-card { border-color: #d9e1ce; border-radius: 18px; background: #fcfdf7; }
+.lobby-screen .battle-seat-card.available { background: #eff5e7; border-color: #cbdabb; }
+.lobby-screen .battle-seat-card.self { border-color: #8aa776; box-shadow: 0 0 0 2px #8aa77620; }
+.lobby-screen .battle-seat-card.host { background: #fdf9ec; }
+.lobby-screen #battle-standup-btn { background: #f2f6eb; border-color: #d5dfca; color: #49613d; }
+@media (max-width: 640px) {
+  body.lobby-screen .page { width: calc(100% - 24px); margin: 64px auto 24px; }
+  .lobby-screen .join-row { grid-template-columns: 1fr; }
+  .lobby-screen .join-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .lobby-screen .battle-room-actions { margin-left: 0; justify-content: flex-start; }
+  body.lobby-screen .battle-seat-section { min-height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) { .lobby-screen .btn { transition: none; } }

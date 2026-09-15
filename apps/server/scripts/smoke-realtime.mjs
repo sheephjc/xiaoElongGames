@@ -6,32 +6,30 @@
  */
 import { io } from 'socket.io-client';
 
-const URL = process.env.TM_SERVER ?? 'http://127.0.0.1:8787';
+const URL = process.argv[2] ?? process.env.TM_SERVER ?? 'http://127.0.0.1:8787';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const fail = (msg) => {
   console.error(`❌ ${msg}`);
   process.exit(1);
 };
-const waitEvent = (socket, event, timeoutMs = 10_000) =>
+const waitEvent = (socket, event, timeoutMs = 10_000, accept = () => true) =>
   new Promise((resolve, reject) => {
     const t = setTimeout(() => {
       socket.off(event, on);
       reject(new Error(`等待 ${event} 超时`));
     }, timeoutMs);
     const on = (payload) => {
+      if (!accept(payload)) return;
       clearTimeout(t);
       socket.off(event, on);
       resolve(payload);
     };
-    socket.once(event, on);
+    socket.on(event, on);
   });
 
 const a = io(URL, { transports: ['websocket'] });
 const b = io(URL, { transports: ['websocket'] });
-await Promise.all([
-  new Promise((r) => a.on('connect', r)),
-  new Promise((r) => b.on('connect', r)),
-]);
+await Promise.all([new Promise((r) => a.on('connect', r)), new Promise((r) => b.on('connect', r))]);
 console.log('✅ 两个客户端已连接');
 
 const created = await new Promise((resolve) =>
@@ -49,20 +47,23 @@ const created = await new Promise((resolve) =>
 if (!created.ok) fail(`建房失败：${created.error}`);
 console.log(`✅ 房间已创建 ${created.code}`);
 
+// 先订阅再加入，避免 ack 返回前已收到的一次性大厅广播丢失。
+const lobbyPromise = waitEvent(a, 'lobby', 10_000, (lobby) => lobby.players.length === 5);
 const joined = await new Promise((resolve) =>
   b.emit('joinRoom', { code: created.code, name: '鳄龙B' }, resolve),
 );
 if (!joined.ok) fail(`加入失败：${joined.error}`);
 console.log(`✅ B 已加入（playerId=${joined.playerId}）`);
 
-const lobby1 = await waitEvent(a, 'lobby');
+const lobby1 = await lobbyPromise;
 if (lobby1.gameId !== 'corcodragon-fight' || lobby1.players.length !== 5) {
   fail(`lobby 异常：${JSON.stringify(lobby1)}`);
 }
 console.log(`✅ lobby 正常（gameId=${lobby1.gameId}，5 座位）`);
 
+const firstSnapshot = waitEvent(a, 'rtSnapshot');
 a.emit('startGame');
-const snapA1 = await waitEvent(a, 'rtSnapshot');
+const snapA1 = await firstSnapshot;
 if (snapA1.phase !== 'heroSelect') fail(`期望 heroSelect，得到 ${snapA1.phase}`);
 console.log('✅ 服务端开始 tick，收到 heroSelect 快照');
 

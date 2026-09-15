@@ -1,5 +1,17 @@
 # 《鳄龙咆哮》素材资产与视觉参考方案
 
+## 小鳄龙之家成员头像
+
+七张成员头像由用户提供，从 `D:/Desktop/小鳄龙桌面组件/client/src/assets/deities` 原样复制到
+`apps/web/public/members/`，原目录未修改。文件为 `a.jpg`、`chili.jpg`、`chui.jpg`、
+`daimeng-hf.jpg`、`guo.jpg`、`hu.jpg`、`mx.jpg`，用于成员介绍页。
+此处仅记录用户提供的素材来源，不将这些头像标注为 CC0；成员链接图标使用内联 SVG。
+
+成员页合照背景由用户提供，从 `D:/Desktop/6fe217f39de248e6298c6c6d5a8a80db.jpg`
+原样复制为 `apps/web/public/members/background.jpg`，模糊通过 CSS 实现，不修改原图。
+HJC 的网站图标从 `D:/Desktop/sheephjc/sheephjc.github.io/assets/images/Woodstock.png`
+原样复制为 `apps/web/public/members/woodstock.png`，配置在成员的 `websiteLogo` 字段中。
+
 > 回答“音效/交互/素材能不能上网获取”：**可以**。本阶段已实际从 [Kenney](https://kenney.nl)
 > 下载 CC0 素材包并把木箱模型接入场景；音效当前使用 WebAudio 程序化合成（零版权风险），
 > 后续可按本文件逐步替换为 CC0 实录音效与正式枪模。

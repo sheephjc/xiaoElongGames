@@ -2323,6 +2323,7 @@ export function CorcodragonFightLocalScreen({
 // ---------------- 详情/配置页 ----------------
 
 export function CorcodragonFightDetailScreen({
+  coverUrl,
   playerCount,
   onPlayerCountChange,
   prefs,
@@ -2333,6 +2334,7 @@ export function CorcodragonFightDetailScreen({
   onlineReady = false,
   onBack,
 }: {
+  coverUrl: string;
   playerCount: number;
   onPlayerCountChange: (n: number) => void;
   prefs: FightPrefs;
@@ -2351,23 +2353,29 @@ export function CorcodragonFightDetailScreen({
   const [aiLevel, setAiLevel] = useState<AILevel>('normal');
   const config = { mode, scoreLimit, tickHz, respawnMs, aiStyle, aiLevel };
   return (
-    <div className="page detail-page">
+    <div className="page detail-page game-foyer game-foyer--fight">
       <div className="panel detail-panel ccf-detail-panel">
+        <button className="ghost-btn foyer-back" onClick={onBack}>← 返回游戏大厅</button>
+        <div className="foyer-hero">
+        <div className="foyer-intro">
         <div className="detail-head">
-          <span className="detail-emoji">🐊</span>
           <div className="detail-title">
             <h1>鳄龙咆哮</h1>
-            <span className="detail-meta">实时 · 3D 英雄射击｜2-7 人｜自由混战 / 团队死斗 / 训练场</span>
+            <span className="detail-meta">2–7 人 · 英雄射击 · 自由混战 / 团队死斗</span>
           </div>
         </div>
         <p className="detail-desc">
           第一人称 3D 英雄射击：5 位鳄龙英雄（冲刺/隐身/护盾/治疗/炸弹）× 4 种武器，
           每一发都有清晰的命中与爆头反馈，先到击杀线者获胜。建议使用桌面浏览器 + 鼠标键盘。
         </p>
+        <div className="foyer-facts"><span><b>5</b> 位英雄</span><span><b>4</b> 种武器</span><span><b>3</b> 种模式</span></div>
+        </div>
+        <div className="foyer-art"><img src={coverUrl} alt="鳄龙英雄小队" /></div>
+        </div>
 
         <div className="detail-modes">
-          <section className="detail-mode">
-            <h2>⚔️ 对战设置</h2>
+          <section className="detail-mode foyer-config">
+            <h2>对战设置</h2>
             <div className="field">
               <span>模式</span>
               <div className="ccf-mode-row">
@@ -2431,8 +2439,8 @@ export function CorcodragonFightDetailScreen({
             </div>
           </section>
 
-          <section className="detail-mode">
-            <h2>🎮 本地对局（浏览器内）</h2>
+          <section className="detail-mode foyer-local">
+            <h2>本地对局</h2>
             {mode === 'training' ? (
               <p className="muted">
                 训练场：固定圆靶 / 移动圆靶 / 固定人靶 / 移动人靶，实时统计命中率与爆头率。
@@ -2454,8 +2462,8 @@ export function CorcodragonFightDetailScreen({
             </button>
           </section>
 
-          <section className="detail-mode">
-            <h2>🌐 联机对战</h2>
+          <section className="detail-mode foyer-online">
+            <h2>好友对战</h2>
             <p className="muted">
               创建房间分享房间码，2-7 人同房实时对战，支持 AI 补位。
             </p>
@@ -2473,8 +2481,8 @@ export function CorcodragonFightDetailScreen({
             </button>
           </section>
 
-          <section className="detail-mode">
-            <h2>⚙️ 鳄龙咆哮偏好（独立于出包魔法师）</h2>
+          <section className="detail-mode foyer-preferences">
+            <h2>游戏偏好</h2>
             <div className="pref-row">
               <button
                 className={`pref-btn ${prefs.sound ? 'active' : ''}`}
@@ -2501,7 +2509,7 @@ export function CorcodragonFightDetailScreen({
             <li>先到击杀线获胜（自由混战看个人、团队死斗看队伍），超时按分数判定。</li>
             <li>武器：1 步枪（自动）· 2 狙击枪（爆头 250）· 3 手枪（无限备弹）· 4 匕首（近战）。</li>
             <li>右键开镜（狙击/步枪更准），R 换弹；爆头伤害翻倍以上，远距离伤害衰减。</li>
-            <li>Q 主动技能、E 终极技（随时间/伤害/击杀充能）；死亡 3 秒后自动重生。</li>
+            <li>Q 主动技能、E 终极技（随时间/伤害/击杀充能）；按所选复活等待时间重生。</li>
           </ul>
           <div className="ccf-controls-grid">
             <span>🖱️ 鼠标：环顾 / 左键射击 / 右键开镜</span>
@@ -2527,9 +2535,6 @@ export function CorcodragonFightDetailScreen({
           ))}
         </details>
 
-        <button className="ghost-btn" onClick={onBack}>
-          ← 返回游戏大厅
-        </button>
       </div>
     </div>
   );

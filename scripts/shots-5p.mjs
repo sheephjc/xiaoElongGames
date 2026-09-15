@@ -19,10 +19,10 @@ try {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage();
     await page.goto(BASE);
-    await page.waitForSelector('.setup-panel');
-    await page.click('button.primary-btn.big'); // 进入游戏大厅
-    await page.waitForSelector('.hall-page');
-    await page.click('.hall-card.playable');
+    await page.waitForSelector('.home[data-panel="main"]');
+    await page.click('[data-home-entry="hall"]'); // 进入游戏大厅
+    await page.waitForSelector('.home[data-panel="hall"]');
+    await page.click('.home-game[data-game-id="trouble-magician"]');
     await page.waitForSelector('.detail-panel');
     // 选 n 人
     await page.click(`.count-btn:has-text("${n} 人")`);

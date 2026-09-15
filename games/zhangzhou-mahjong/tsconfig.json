@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "allowJs": true, "checkJs": false, "types": ["node"] },
+  "include": ["index.ts", "server", "client/src/online-game-engine.js", "client/src/room-reducer.js", "client/src/shared"]
+}

@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: concept cover illustration for the game 暗棋 in a Chinese browser game lobby; a new image.
+Primary request: polished painterly Chinese hidden-chess game key art, an atmospheric wooden Xiangqi board with round hidden wooden chess pieces and a few revealed red and black pieces. This game uses a full Chinese chess board, nine files and ten ranks with palace diagonals and a river gap, not a 4-by-8 Banqi board.
+Scene/backdrop: a close view of a warm walnut chess table; softly blurred traditional study background.
+Subject: a small cluster of elegant thick round wood chess discs centered in the frame, some face down with a simple carved geometric back, one red revealed disc with the single accurate glyph 帥 and one black disc with the single accurate glyph 將. The board lines extend into soft depth behind them, conveying concealed identities and thoughtful two-player strategy.
+Style/medium: refined hand-painted game illustration with believable wood grain, soft detailed edges and calm storybook atmosphere; premium board-game concept art.
+Composition/framing: landscape 1536x1024, main chess discs and board focal point within central 40 percent so the image also works cropped as a vertical lobby cover. No user interface or title text.
+Lighting/mood: gentle amber daylight, quiet mystery, subtle gold edge light, inviting rather than ominous.
+Color palette: walnut brown, warm ivory, muted forest green in the background, red and charcoal chess glyphs, restrained pale gold.
+Constraints: no people, no weapons, no western chess pieces, no mahjong tiles, no logos, no watermark, no promotional copy. A clean finished raster illustration.

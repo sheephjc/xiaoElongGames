@@ -1,3 +1,5 @@
+name: xiaoelong-games
+
 services:
   tm-server:
     build: .

@@ -248,13 +248,15 @@ export class Game {
         magic,
         text: `${p.name} 大喊「${MAGIC_DEFS[magic].name}」……手中并没有这张牌！出包了！😱`,
       });
-      this.pushEvent({
-        type: 'dice',
-        playerId: p.id,
-        magic,
-        amount: dmg,
-        text: magic === 'dragon' ? `🎲 掷出 ${dmg}，反噬伤害 ${dmg} 点` : '',
-      });
+      if (magic === 'dragon') {
+        this.pushEvent({
+          type: 'dice',
+          playerId: p.id,
+          magic,
+          amount: dmg,
+          text: `🎲 掷出 ${dmg}，反噬伤害 ${dmg} 点`,
+        });
+      }
       p.hp = Math.max(0, p.hp - dmg);
       if (p.hp <= 0) {
         p.alive = false;

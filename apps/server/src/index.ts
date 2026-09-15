@@ -14,6 +14,8 @@ import type { ClientToServerEvents, ServerToClientEvents } from '@tm/rules';
 import { Room, RoomSocket, genRoomCode, sanitizeName } from './room';
 import { RealtimeRoom, RT_GAME_ID } from './realtime-room';
 import { clientIp, sanitizeJoinCode } from './security';
+import { bindAnqiNamespace, type AnqiNamespace } from '@tm/game-anqi/server';
+import { bindMahjongNamespace } from '@tm/game-zhangzhou-mahjong/server';
 
 const PORT = Number(process.env.PORT ?? 8787);
 const HOST = process.env.HOST ?? '0.0.0.0';
@@ -38,6 +40,13 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: { origin: corsOrigin },
   maxHttpBufferSize: MAX_SOCKET_PAYLOAD,
 });
+// 暗棋协议独立于原有大厅协议，共用 HTTP / WebSocket 端口。
+const anqiRooms = bindAnqiNamespace(io.of('/anqi') as unknown as AnqiNamespace);
+app.get('/api/anqi/health', (_req, res) => res.json({ ok: true, rooms: anqiRooms.roomCount }));
+const mahjongRooms = bindMahjongNamespace(io.of('/zhangzhou-mahjong'), {
+  ipOf: socket => clientIp(socket.handshake, TRUST_PROXY),
+});
+app.get('/api/mahjong/health', (_req, res) => res.json({ ok: true, rooms: mahjongRooms.roomCount }));
 
 const rooms = new Map<string, Room | RealtimeRoom>();
 const connByIp = new Map<string, number>();

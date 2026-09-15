@@ -5,7 +5,7 @@
 
 ## 1. 环境与依赖
 
-- Node.js ≥ 20；pnpm ≥ 9（本仓库锁定 pnpm 11.7，corepack 可自动启用）。
+- Node.js ≥ 22.13；pnpm 11.7.0（corepack 可自动启用锁定版本）。
 - 一次性安装全部依赖（工作区 + three/tweakpane/playwright 等）：
 
 ```bash
