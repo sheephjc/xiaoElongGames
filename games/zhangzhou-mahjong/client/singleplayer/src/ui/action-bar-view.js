@@ -119,6 +119,7 @@ export function showChiSubMenuView(state, helpers) {
             for (let i = 0; i < hand.length; i++) {
                 if (usedIdx.has(i)) continue;
                 const t = hand[i];
+                if (helpers.isGoldChar(t.char)) continue;
                 const lt = helpers.getLogic(t);
                 if (lt && lt.type === targetLogic.type && lt.val === val) {
                     usedIdx.add(i);

@@ -876,6 +876,7 @@ function handleActionButton(type, rawPayload) {
 
 	function execute(type, data) {
     if(state.isGameOver) return;
+    if (!isValidDiscardClaim(0, type, data)) return;
     const p = state.players[0];
     if (runtime.uiEnabled) hideActionBarView();
     state.waitingAction = false;
@@ -994,7 +995,7 @@ if (type === 'AN_GANG' || type === 'BU_GANG') {
 
     if (type === 'CHI') {
         data.forEach(v => {
-            let idx = p.hand.findIndex(t => getLogic(t).val === v && getLogic(t).type === getLogic(targetTile).type);
+            let idx = p.hand.findIndex(t => !isGoldTile(t) && getLogic(t).val === v && getLogic(t).type === getLogic(targetTile).type);
             tiles.push(p.hand.splice(idx, 1)[0]);
         });
     } else {
@@ -1171,6 +1172,7 @@ if (hu.types.includes("游金") ) {
 }
 
 function executeAIAction(pIdx, type, data) {
+    if (!isValidDiscardClaim(pIdx, type, data)) return;
     const p = state.players[pIdx];
     if (['CHI', 'PENG', 'GANG', 'AN_GANG', 'BU_GANG', 'HU'].includes(type)) {
         playActionVoice(type);
@@ -1205,7 +1207,7 @@ function executeAIAction(pIdx, type, data) {
     if (type === 'CHI') {
         // 根据传入的 data（数值数组）从手牌中找出对应的牌
         data.forEach(v => {
-            let idx = p.hand.findIndex(t => getLogic(t).val === v && getLogic(t).type === getLogic(state.lastDiscard).type);
+            let idx = p.hand.findIndex(t => !isGoldTile(t) && getLogic(t).val === v && getLogic(t).type === getLogic(state.lastDiscard).type);
             if (idx !== -1) tiles.push(p.hand.splice(idx, 1)[0]);
         });
     } else {
@@ -1379,6 +1381,17 @@ let huInfo = checkHuInfo(pIdx, null, true);
 
     render();
     defer(nextTurn, 400);
+}
+
+function isValidDiscardClaim(pIdx, type, data) {
+    if (!['CHI', 'PENG', 'GANG'].includes(type)) return true;
+    if (!state.lastDiscard || isGoldTile(state.lastDiscard) || pIdx === state.turn) return false;
+    const options = getReactionOptions(state.lastDiscard, pIdx === (state.turn + 1) % 4, pIdx);
+    if (type === 'CHI') {
+        return Array.isArray(data) && data.length === 2
+            && options.CHI.some(choice => choice[0] === data[0] && choice[1] === data[1]);
+    }
+    return options[type];
 }
 
 // 找到 getReactionOptions 函数，整体替换为以下内容

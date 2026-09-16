@@ -1054,6 +1054,38 @@ function checkWhiteDragonAsGoldLogicForChi() {
     assert.equal(afterChi.shows['1'][0].tiles.includes('Z7'), true);
 }
 
+function checkClaimsKeepPhysicalGold() {
+    for (const { hand, discard, gold = 'W5', type, choice, meld } of [
+        { hand: ['W5', 'Z7', 'W4', 'T1'], discard: 'W3', type: 'CHI', choice: ['W4', 'W5'], meld: ['W3', 'W4', 'Z7'] },
+        { hand: ['W5', 'Z7', 'Z7', 'T1'], discard: 'Z7', type: 'PENG', meld: ['Z7', 'Z7', 'Z7'] },
+        { hand: ['W5', 'W4', 'T1'], discard: 'W3', type: 'CHI' },
+        { hand: ['W5', 'W5', 'T1'], discard: 'Z7', type: 'PENG' },
+        { hand: ['Z7', 'Z7', 'T1'], discard: 'Z7', gold: 'Z7', type: 'PENG' },
+        { hand: ['W3', 'W4', 'Z7', 'Z7'], discard: 'W5', type: 'CHI' }
+    ]) {
+        const state = makeBaseGameState();
+        state.goldTile = gold;
+        state.roundCount = 3;
+        state.seatControls = { '0': 'human', '1': 'human', '2': 'human', '3': 'human' };
+        state.hands = { '0': [discard, 'T9'], '1': hand, '2': ['S1'], '3': ['S9'] };
+        const pending = applyOnlineGameAction(state, {
+            type: 'DISCARD', seatId: 0, payload: { index: 0 }, ts: 760
+        }, 760);
+        const options = pending.pendingClaim?.optionsBySeat?.['1'];
+        if (!meld) {
+            assert.equal(type === 'CHI' ? !!options?.CHI?.length : !!options?.PENG, false);
+            const after = applyOnlineGameAction(pending, { type, seatId: 1, payload: { choice }, ts: 761 }, 761);
+            assert.deepEqual(after.shows['1'], []);
+            assert.deepEqual(after.hands['1'], pending.hands['1']);
+            continue;
+        }
+        assert.ok(type === 'CHI' ? options?.CHI?.length : options?.PENG);
+        const after = applyOnlineGameAction(pending, { type, seatId: 1, payload: { choice }, ts: 761 }, 761);
+        assert.deepEqual([...after.shows['1'][0].tiles].sort(), [...meld].sort());
+        assert.equal(after.hands['1'].filter(t => t === gold).length, hand.filter(t => t === gold).length);
+    }
+}
+
 function checkWhiteDragonAsGoldLogicForHu() {
     const state = makeBaseGameState();
     state.goldTile = 'W5';
@@ -1508,6 +1540,7 @@ checkBotDiscardPrefersIsolatedHonor();
 checkBotSkipsChiWhenItWouldDiscardSameClaimTile();
 checkMultiHuPriorityBySeatDistance();
 checkWhiteDragonAsGoldLogicForChi();
+checkClaimsKeepPhysicalGold();
 checkWhiteDragonAsGoldLogicForHu();
 checkYouJinStacksGangFlowerFromReplenish();
 checkDoubleGoldCannotDiscardHu();
